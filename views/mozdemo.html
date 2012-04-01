@@ -1,85 +1,255 @@
+<!DOCTYPE html>
 <html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" type="text/css" href="/static/chess/css/style.css"/>
+        <title>.:: CHESS CAM :.</title>
+        
+        <!-- <script type='text/javascript' src="/static/chess/includes.js"></script>  -->
+       
+<script id="shader-fs" type="x-shader/x-fragment">        
+#ifdef GL_ES
+precision mediump float;
+precision mediump vec3;
+#endif
 
-<head>
-  <script src="/static/external/jquery-1.6.4.min.js"></script>
-  <!--<script src="/static/external/qunit.js"></script>-->
-  <script src="/static/js/mozdemo.js"></script>
-  <link href='http://fonts.googleapis.com/css?family=Sorts+Mill+Goudy' rel='stylesheet' type='text/css'>
+uniform int render, shadow, white;
+uniform sampler2D uSampler0;
+uniform float screenRed;
+uniform vec3 cam_pos;
 
-  <style type="text/css">
-  body {
-    font-family: "Sorts Mill Goudy", serif;
-  }
-  #header {
-    font-size: 48px;
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  #callme {
-    font-size: 28px;
-    display: block;
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  #local {
-    margin-top: 20px;
-    margin-left: 30px;
-    margin-bottom: 50px;
-    float: right;  
-    width: 640px;
-    height: 480px;
-    border-style: solid;
-    border-width: 2px;
-  }
-  #remote {
-    margin-top: 20px;
-    margin-right: 30px;
-    margin-bottom: 50px;
-    float: left;  
-    width: 640px;
-    height: 480px;
-    border-style: solid;
-    border-width: 2px;
-  }
-  #logwindow {
-    width: 80%;
-    height: 20%;
-    padding: 5px;
-    overflow: auto;
-    font-family: "courier";
-    margin-left: auto;
-    margin-right: auto;
-    border-style: dotted;
-    border-width: 1px;
-  }
-  </style>
+varying vec2 vTextureCoord;
+varying vec3 vNormal, sc_pos;
+
+const vec3 LIGHT_POS=vec3(0,0,4.);
+const vec4 ADD_COLOR=vec4(0.1,0.1,0.1,0.);
+const vec3 BLACK=vec3(0.,0.,0.);
+const vec3 WHITE=vec3(1.,1.,1.);
+const vec4 SHADOW_COLOR=vec4(0.0,0.0,0.0,0.5);
+
+
+void main(void) {
+     if (shadow==1) {
+        gl_FragColor=SHADOW_COLOR;
+        return;
+     }
+     if (render==1) { //chessman
+        float I;
+        vec3 u=normalize(cam_pos-sc_pos);
+        vec3 l=normalize(LIGHT_POS-sc_pos);
+        if (white==1) {
+            //gl_FragColor=pow(0.6*dot((l-u),vNormal), 32.)*vec4(WHITE,1.); return;
+            I=.4+.4*dot(l, vNormal)+max(0.,dot((l+u),vNormal))+max(0., pow(0.5*dot((l-u),vNormal), 20.));
+        } else {
+            I=.0+.2*max(0., dot(l, vNormal))+max(0., pow(0.5*dot((l-u),vNormal), 20.));
+        }
+        gl_FragColor=I*texture2D(uSampler0,vTextureCoord); gl_FragColor[3]=1.;
+        return;
+     }
+     if (render==3) { //ground
+        float I=.4+.4*dot(normalize(LIGHT_POS-sc_pos), vNormal);
+        I*=1.-smoothstep(0.,30.,length(sc_pos));
+        gl_FragColor=I*texture2D(uSampler0,vTextureCoord); gl_FragColor[3]=1.;
+        return;
+     }
+     if (render==4) { //video screen
+        vec4 color=texture2D(uSampler0,vTextureCoord);
+    	float c=0.299*color[0]+0.587*color[1]+0.114*color[2];
+        float a=1.;
+        if (sc_pos[2]<.5) a=smoothstep(0.,.5,sc_pos[2]);
+        if (sc_pos[2]>2.3) a=1.-smoothstep(2.3,2.8,sc_pos[2]);
+        gl_FragColor=vec4(mix(c, .8, screenRed), c, c, a);
+        return;
+
+		// attempt 1
+/*        vec4 color=texture2D(uSampler0,vTextureCoord);   //take color
+        gl_FragColor=color;
+        return;
+*/        
+/*        // attempt 2
+        vec4 color=texture2D(uSampler0,vTextureCoord);   //take color
+        float c=0.299*color[0]+0.587*color[1]+0.114*color[2]; //convert to black and white
+        gl_FragColor=vec4(mix(c, .8, screenRed), c, c, 1.);
+        return;      
+  */      
+        // attempt 3
+/*        vec4 color=texture2D(uSampler0,vTextureCoord);   //take color
+        float c=0.299*color[0]+0.587*color[1]+0.114*color[2]; //convert to black and white
+        //gl_FragColor=vec4(mix(c, .8, screenRed), c, c, 1.);
+        gl_FragColor=vec4(mix(c*(1.0-screenRed)+.8*screenRed, c, c, 1.);
+        return;              
+*/        
+     }
+     float I=.3+.5*dot(normalize(LIGHT_POS-sc_pos), vNormal);
+     if (render==2) { //chessboard
+        I+=0.3;
+     }
+     gl_FragColor=I*ADD_COLOR+I*texture2D(uSampler0,vTextureCoord); gl_FragColor[3]=1.; return;
+}
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">  
+        attribute vec3 aVertexNormal, aVertexPosition;
+        attribute vec2 aTextureCoord;
+
+        uniform mat4 uMVMatrix,uPMatrix, OBJ_Matrix, V_Matrix;
+        uniform int render, shadow;
+
+        varying vec2 vTextureCoord;
+        varying vec3 vNormal, sc_pos;
+
+        const vec3 LIGHT_POS=vec3(0.,0.,4.);
+
+        void main(void) {
+               vec4 pos;
+               vTextureCoord=aTextureCoord;
+               sc_pos=vec3(OBJ_Matrix*vec4(aVertexPosition, 1.)); //position in scene ref
+               //vNormal=mat3(OBJ_Matrix)*aVertexNormal;
+               vNormal=vec3(OBJ_Matrix*vec4(aVertexNormal,0.));
+	
+               if (shadow==1) {
+                  vec3 n=normalize(sc_pos-LIGHT_POS);
+                  vec3 position=sc_pos-(sc_pos[2]/n[2])*n+vec3(0.,0.,0.001);
+                  pos=V_Matrix * vec4(position,1.);
+
+               } else {
+                  pos=uMVMatrix * vec4(aVertexPosition,1.);
+               }
+               
+               //sc_pos=vec3(0.,0.,1.);
+               gl_Position = uPMatrix * pos;
+        }
+</script>
+      
+
 </head>
 
-<body>
+<body style="margin: 0px">
+    
+<video width="240" height="120" class="localView" id="localView" autoplay="autoplay"></video>
 
-<div id="header">Mozilla WebRTC Demo</div>
+<!-- <a class="controls" onclick="GAME.restart()">RESTART</a>
+<a class="credits" onclick="lib_dom.hideShow('credits_win')">CREDITS</a>  -->
 
-{{if !start}}
-<a id="callme" href="/mozdemoc/${ them }/${ me }">Call me!</a>
-{{/if}}
+<a class="controls" onclick="GAME.restart();">RESTART</a>
+<a class="credits" onclick="cc.HangUp();">CREDITS</a>
 
-<div id="remote"><canvas id="rview" width="640" height="480"></canvas><br><p>Remote</p></div>
 
-<div id="local"><canvas id="lview" width="640" height="480"></canvas><br><p>Local</p></div>
+<div class="infos" id="infosChess"></div>
 
-<div id="logwindow"></div>
+<video width="512" height="512" class="remoteView" id="remoteView" autoplay="autoplay" hidden="true"></video>    
 
+<script src="/static/external/jquery-1.6.4.min.js"></script>
+<script src="/static/external/qunit.js"></script>
+<script src="/static/js/mozdemo.js"></script>
+
+<script type='text/javascript' src='/static/chess/lib/lib_utils.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_maths.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_objs.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_ajax.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_array.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_vector2D.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_form.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_dom.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_colors.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_matrix/lib_matrix_base.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_matrix/lib_matrix_base3.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_matrix/lib_matrix_base4.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_matrix/lib_matrix_mv.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_matrix/lib_matrix_proj.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_matrix/lib_matrix_rot.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_3D/lib_vector3D.js'></script>
+<script type='text/javascript' src='/static/chess/lib/lib_3D/lib_buffersArray.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Webgl/windowAnimationFrame.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Webgl/Shaders/Shaders.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Webgl/Buffers/VertexBuffer.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Webgl/Buffers/VertexIndexBuffer.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Webgl/Matrix.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Textures/Texture.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Textures/TextureCanvas.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Textures/TextureVideo.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Renders.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Scene.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/View.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Navigation.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Context3D.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Obj/Obj.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Obj/JSONobj.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Obj/SkydomeObj.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Obj/VideoScreenObj.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Meshes/Mesh.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Meshes/Procedural/Primitives/Pave.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Meshes/Procedural/Primitives/Quad.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Meshes/Procedural/Primitives/Skydome.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Audiotrack.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Webrtc.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/Engine3D.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Colliders/Ray.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Colliders/Cube.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Colliders/Octree.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Colliders/QuadCollider.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/Game.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/params.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/chess/Chess.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/chess/Tower.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/chess/Chessboard.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/chess/Chessman.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/chess/chessmen/Bishop.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/chess/chessmen/King.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/chess/chessmen/Knight.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/chess/chessmen/Pawn.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/chess/chessmen/Queen.js'></script>
+<script type='text/javascript' src='/static/chess/engine3D/js/chess/chessmen/Rook.js'></script>
+<script type='text/javascript' src="http://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+ 
+ 
+<div class="canvasDiv" id="canvasDiv">
+    <canvas id="canvas3d" class="canvas3d" width="800" height="520"></canvas>
+</div>
+        
+        <!-- <div class="connectWin" id="connectWin">
+            <div class="beforeConnect" id="beforeConnect">
+                 <button id="connect" class="white" onclick="WEBRTC.connect();">Connect</button> 
+                <div class="line">
+                     <label>Server :</label><input type="text" id="server" value="http://192.168.1.32:8888" style="padding-bottom: 4px"/>
+                </div>
+                <div class="line">
+                      <label>Name:</label><input type="text" id="name" size="30" value="name"/>
+                </div>
+            </div>
+            <div class="afterConnect" id="afterConnect">
+               <label>Available players :</label>
+               <select id="peers" size="5" disabled="true">
+                 <option value="-1">Not connected</option>
+              </select><button id="call" onclick="WEBRTC.doCallCheck();" disabled="true" style="height: 88px;">P L A Y</button>
+            </div>
+        </div> //-->
+
+<script>
+
+    var ENGINE3D;
+    function maingame() {
+        ENGINE3D=new Engine3D({canvasId: "canvas3d", fullScreen: true});
+        ENGINE3D.init();
+        ENGINE3D.start();
+    }
+            
+    maingame();
+            
+</script>
+        
 <script>
   var me = "${ me }";
   var them = "${ them }";
-  var start = "${ start }";
+  var start = ${ start };
+  var ip = "${ ip }";
 
-  var local = document.getElementById("lview").getContext("2d");
-  var remote = document.getElementById("rview").getContext("2d");
-  new CallingClient(default_config, me, them, local, remote, start);
+  var local = document.getElementById("localView");
+  var remote = document.getElementById("remoteView");
+
+  var cc = new CallingClient(default_config, me, them, local, remote, start, ip);
 </script>
 
+                 
 </body>
 </html>

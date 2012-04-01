@@ -1,0 +1,59 @@
+#ifdef GL_ES
+precision mediump float;
+precision mediump vec3;
+#endif
+
+uniform int render, shadow, white;
+uniform sampler2D uSampler0;
+uniform float screenRed;
+uniform vec3 cam_pos;
+
+varying vec2 vTextureCoord;
+varying vec3 vNormal, sc_pos;
+
+const vec3 LIGHT_POS=vec3(0,0,4.);
+const vec4 ADD_COLOR=vec4(0.1,0.1,0.1,0.);
+const vec3 BLACK=vec3(0.,0.,0.);
+const vec3 WHITE=vec3(1.,1.,1.);
+const vec4 SHADOW_COLOR=vec4(0.0,0.0,0.0,0.5);
+
+
+void main(void) {
+     if (shadow==1) {
+        gl_FragColor=SHADOW_COLOR;
+        return;
+     }
+     if (render==1) { //chessman
+        float I;
+        vec3 u=normalize(cam_pos-sc_pos);
+        vec3 l=normalize(LIGHT_POS-sc_pos);
+        if (white==1) {
+            //gl_FragColor=pow(0.6*dot((l-u),vNormal), 32.)*vec4(WHITE,1.); return;
+            I=.4+.4*dot(l, vNormal)+max(0.,dot((l+u),vNormal))+max(0., pow(0.5*dot((l-u),vNormal), 20.));
+        } else {
+            I=.0+.2*max(0., dot(l, vNormal))+max(0., pow(0.5*dot((l-u),vNormal), 20.));
+        }
+        gl_FragColor=I*texture2D(uSampler0,vTextureCoord); gl_FragColor[3]=1.;
+        return;
+     }
+     if (render==3) { //ground
+        float I=.4+.4*dot(normalize(LIGHT_POS-sc_pos), vNormal);
+        I*=1.-smoothstep(0.,30.,length(sc_pos));
+        gl_FragColor=I*texture2D(uSampler0,vTextureCoord); gl_FragColor[3]=1.;
+        return;
+     }
+     if (render==4) { //video screen
+        //vec4 color=texture2D(uSampler0,vTextureCoord);
+        //float c=0.299*color[0]+0.587*color[1]+0.114*color[2];
+        //float a=1.;
+        //if (sc_pos[2]<.5) a=smoothstep(0.,.5,sc_pos[2]);
+        //if (sc_pos[2]>2.3) a=1.-smoothstep(2.3,2.8,sc_pos[2]);
+        //gl_FragColor=vec4(mix(c, .8, screenRed), c, c, a);
+        return;
+     }
+     float I=.3+.5*dot(normalize(LIGHT_POS-sc_pos), vNormal);
+     if (render==2) { //chessboard
+        I+=0.3;
+     }
+     gl_FragColor=I*ADD_COLOR+I*texture2D(uSampler0,vTextureCoord); gl_FragColor[3]=1.; return;
+}

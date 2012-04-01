@@ -91,21 +91,44 @@ app.get("/mozdemoa/:user" + user_re + "/:target" + user_re, function(request, re
   var params = {
     me: request.params.user,
     them: request.params.target,
-    start: false
+    start:false
   };
 
   response.render("mozdemo.html", params);
 });
 
-app.get("/mozdemoc/:user" + user_re + "/:target" + user_re, function(request, response) {
+app.get("/mozdemoc/:user" + user_re + "/:target" + user_re + "/:ip", function(request, response) {
   var params = {
     me: request.params.user,
     them: request.params.target,
-    start: true
+    start: true,
+    ip: request.params.ip
   };
 
   response.render("mozdemo.html", params);
 });
+
+app.get("/mozdemod/:user" + user_re + "/:target" + user_re, function(request, response) {
+  var params = {
+    me: request.params.user,
+    them: request.params.target,
+    start:false
+  };
+
+  response.render("mozdemo_simple.html", params);
+});
+
+app.get("/mozdemoe/:user" + user_re + "/:target" + user_re + "/:ip", function(request, response) {
+  var params = {
+    me: request.params.user,
+    them: request.params.target,
+    start: true,
+    ip: request.params.ip
+  };
+
+  response.render("mozdemo_simple.html", params);
+});
+
 
 app.get("/mozdemo", function(request, response) {
   var to_uri = "/mozdemoa/" + ++index + "/" + ++index;

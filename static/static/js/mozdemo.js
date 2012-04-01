@@ -1,11 +1,8 @@
 
 var ui_log = function(msg) {
-  var log = "<p>";
-  log += msg.replace("\\r\\n", "<br/>");
-  log += "</p>"
-
+  var t = document.createTextNode(msg);
   var d = document.createElement("div");
-  d.innerHTML = log;
+  $(d).append(t);
 
   $("#logwindow").append(d);
 };
@@ -40,24 +37,56 @@ var ajax = function (params) {
   }
 };
 
-var CallingClient = function(config_, username, peer, local, remote, start_call) {
+
+var CallingClient = function(config_, username, peer, local, remote, start_call, ip) {
   console.log("Calling client constructor");
   var poll_timeout = 500; // ms
   var config = $.extend({}, config_);
   var state = "INIT";
+  var local_ = local;
+  var remote_ = remote;
 
   var log = function(msg) {
     console.log("LOG (" + username + "): " + msg);
     ui_log("LOG (" + username + "): " + msg);
   };
 
+  var HangUp = function() {
+    webrtc.hangup();
+  }
+
+  var StartCall = function() {
+    webrtc.startCall();
+    local_.play();
+    remote_.play();
+  }
+
+
   log("Calling client: user=" + username + " peer = " + peer);
-  var webrtc = navigator.getWebrtcContext(JSON.stringify(config), function(msg, arg) {
+  log(" config = " +JSON.stringify(config));
+  var webrtc = navigator.getWebrtcContext(JSON.stringify(config), function(msg, arg, localStream, remoteStream) {
     switch (msg) {
+    case "STREAM":
+	alert(" local stream " + localStream  +" remote stream " + remoteStream);
+	local.src = localStream;
+	remote.src = remoteStream;
+	break;
     case "RINGING":
       var answer = confirm("Incoming call! Accept?");
-      if (answer) webrtc.accept(local, remote);
+      if (answer) {
+		webrtc.accept();
+		local.play();
+		remote.play();
+      }
       else webrtc.hangup();
+      break;
+    case "IPFOUND":
+	  log(" ip found " );
+      if (!start_call) {
+        var link = document.getElementById("callme");
+        link.href += "/" + arg;
+        link.style.display = "block";
+      }
       break;
     }
   });
@@ -107,10 +136,11 @@ var CallingClient = function(config_, username, peer, local, remote, start_call)
 
     setTimeout(internal_poll, 1000);
   };
-
-  if (start_call != "false") {
+  if (start_call) {
     log("Making call to " + peer);
-    webrtc.startCall(local, remote);
+    webrtc.startCall();
+	local.play();
+	remote.play();
   } else {
     log("Waiting for call as " + username);
   }
@@ -118,6 +148,12 @@ var CallingClient = function(config_, username, peer, local, remote, start_call)
   // Start polling
   poll();
   internal_poll();
+
+  return { 
+    HangUp : HangUp,
+    StartCall : StartCall
+  }
+
 };
 
 
