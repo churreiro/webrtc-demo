@@ -61,6 +61,15 @@ var CallingClient = function(config_, username, peer, local, remote, start_call,
     remote_.play();
   }
 
+  var CreateOffer = function() {
+  	msg = webrtc.createOffer();
+  	log("offer: " + JSON.stringify(msg));
+  }
+  
+  var CreateAnswer = function() {
+  	msg = webrtc.createAnswer();
+  	log("answer: " + JSON.stringify(msg));
+  }
 
   log("Calling client: user=" + username + " peer = " + peer);
   log(" config = " +JSON.stringify(config));
@@ -151,7 +160,9 @@ var CallingClient = function(config_, username, peer, local, remote, start_call,
 
   return { 
     HangUp : HangUp,
-    StartCall : StartCall
+    StartCall : StartCall,
+    CreateOffer : CreateOffer,
+    CreateAnswer : CreateAnswer
   }
 
 };
