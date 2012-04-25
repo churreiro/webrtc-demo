@@ -1,0 +1,16 @@
+To use:
+
+  Browse to http://host:3000/mozdemo for primary chess demo
+     URL will show http://host:3000/mozdemo/M/N
+
+  Other browser should browse to http://host:3000/mozdemoc/N/M/my_ip_address
+     Note that N and M are reversed from what you see in callee above
+
+
+For DataChannel tests:
+
+  Browse to http://host:3000/datachan for simple call+data_channels
+     URL will show http://host:3000/listen/M/N
+
+  Other browser should browse to http://host:3000/connect/N/M/my_ip_address
+     Note that N and M are reversed from what you see in the listener
