@@ -7,6 +7,10 @@ var ui_log = function(msg) {
   $("#logwindow").append(d);
 };
 
+var clear_log = function() {
+	$("#logwindow").empty();
+}
+
 
 // simple wrapper around XHR. The cool kids use JQuery here, but
 // we want a self-contained example
@@ -64,11 +68,41 @@ var CallingClient = function(config_, username, peer, local, remote, start_call,
   var CreateOffer = function() {
   	msg = webrtc.createOffer();
   	log("offer: " + JSON.stringify(msg));
+  	
+      var msg2 = {
+        dest: peer,
+        body: msg
+      };
+
+      log("Sending: " + JSON.stringify(msg2));
+
+      ajax({
+        url: "/msg/",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(msg2)
+      });
+	
   }
   
   var CreateAnswer = function() {
   	msg = webrtc.createAnswer();
   	log("answer: " + JSON.stringify(msg));
+  	
+       var msg2 = {
+        dest: peer,
+        body: msg
+      };
+
+      log("Sending: " + JSON.stringify(msg2));
+
+      ajax({
+        url: "/msg/",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(msg2)
+      });
+ 	
   }
 
   log("Calling client: user=" + username + " peer = " + peer);
@@ -172,4 +206,3 @@ default_config = {
   stun: 'stun.l.google.com:19302'
 };
 
-//new CallingClient(config, "abc", "def", video, true);

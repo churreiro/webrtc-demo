@@ -163,7 +163,18 @@ app.get("/datachan", function(request, response) {
 
 
 
-app.get("/mozdemojsep/:user" + user_re + "/:target" + user_re, function(request, response) {
+app.get("/mozdemojsep/:user" + user_re + "/:target" + user_re + "/:ip", function(request, response) {
+  var params = {
+    me: request.params.user,
+    them: request.params.target,
+    start: false,
+    ip: request.params.ip
+  };
+
+  response.render("mozdemo_jsep.html", params);
+});
+
+app.get("/mozdemojseplocal/:user" + user_re + "/:target" + user_re, function(request, response) {
   var params = {
     me: request.params.user,
     them: request.params.target,
@@ -174,10 +185,9 @@ app.get("/mozdemojsep/:user" + user_re + "/:target" + user_re, function(request,
 });
 
 app.get("/mozdemojp", function(request, response) {
-  var to_uri = "/mozdemojsep/" + ++index + "/" + ++index;
+  var to_uri = "/mozdemojseplocal/" + ++index + "/" + ++index;
   response.redirect(to_uri);
 });
-
 
 
 var port = process.env.PORT || 3000;
