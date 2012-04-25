@@ -129,9 +129,35 @@ app.get("/mozdemoe/:user" + user_re + "/:target" + user_re + "/:ip", function(re
   response.render("mozdemo_simple.html", params);
 });
 
+app.get("/listen/:user" + user_re + "/:target" + user_re, function(request, response) {
+  var params = {
+    me: request.params.user,
+    them: request.params.target,
+    start:false
+  };
+
+  response.render("mozdemo_data.html", params);
+});
+
+app.get("/connect/:user" + user_re + "/:target" + user_re + "/:ip", function(request, response) {
+  var params = {
+    me: request.params.user,
+    them: request.params.target,
+    start: true,
+    ip: request.params.ip
+  };
+
+  response.render("mozdemo_data.html", params);
+});
+
 
 app.get("/mozdemo", function(request, response) {
   var to_uri = "/mozdemoa/" + ++index + "/" + ++index;
+  response.redirect(to_uri);
+});
+
+app.get("/datachan", function(request, response) {
+  var to_uri = "/listen/" + ++index + "/" + ++index;
   response.redirect(to_uri);
 });
 
