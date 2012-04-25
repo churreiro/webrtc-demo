@@ -161,6 +161,25 @@ app.get("/datachan", function(request, response) {
   response.redirect(to_uri);
 });
 
+
+
+app.get("/mozdemojsep/:user" + user_re + "/:target" + user_re, function(request, response) {
+  var params = {
+    me: request.params.user,
+    them: request.params.target,
+    start: false,
+  };
+
+  response.render("mozdemo_jsep.html", params);
+});
+
+app.get("/mozdemojp", function(request, response) {
+  var to_uri = "/mozdemojsep/" + ++index + "/" + ++index;
+  response.redirect(to_uri);
+});
+
+
+
 var port = process.env.PORT || 3000;
 app.listen(port, function() {
   console.log("Listening on " + port);
