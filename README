@@ -1,3 +1,10 @@
+To install:
+   Make sure node.js is installed
+   Unpack this
+   cd webrtc-demo
+   npm install
+   node web.js
+
 To use:
 
   Browse to http://host:3000/mozdemo for primary chess demo
