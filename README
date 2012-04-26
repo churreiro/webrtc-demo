@@ -7,17 +7,30 @@ To install:
 
 To use:
 
-  Browse to http://host:3000/mozdemo for primary chess demo
-     URL will show http://host:3000/mozdemo/M/N
+  Browse to http://host:3000/ to see a menu of choices
+
+---
+  Browse to http://host:3000/chess for primary chess demo
+     URL will show http://host:3000/mozdemoa/M/N
 
   Other browser should browse to http://host:3000/mozdemoc/N/M/my_ip_address
      Note that N and M are reversed from what you see in callee above
 
+  Yes, we need a better way to get the URL for the other party...
+---
+  Browse to http://host:3000/simple for a simple call demo
+     URL will show http://host:3000/mozdemod/M/N
 
-For DataChannel tests:
-
+  Other browser should browse to http://host:3000/mozdemoe/N/M/my_ip_address
+     Note that N and M are reversed from what you see in callee above
+---  
   Browse to http://host:3000/datachan for simple call+data_channels
      URL will show http://host:3000/listen/M/N
 
   Other browser should browse to http://host:3000/connect/N/M/my_ip_address
      Note that N and M are reversed from what you see in the listener
+---
+  Browse to http://host:3000/jsep for jsep tests
+     URL will show http://host:3000/mozdemojsep/M/N
+--
+  Browse to http://host:3000/roap for ROAP tests (obsolete?)

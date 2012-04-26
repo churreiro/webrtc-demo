@@ -65,6 +65,12 @@ app.post('/reset', function(request, response) {
 });
 
 app.get('/', function(request, response) {
+  var params = {
+  };
+    response.render("menu.html",params);
+});
+
+app.get('/roap', function(request, response) {
   var local_src = "/static/js";
   var svn_src = "http://svn.resiprocate.org/rep/ietf-drafts/fluffy/roap_demo";
   var params = {
@@ -156,6 +162,16 @@ app.get("/mozdemo", function(request, response) {
   response.redirect(to_uri);
 });
 
+app.get("/simple", function(request, response) {
+  var to_uri = "/mozdemod/" + ++index + "/" + ++index;
+  response.redirect(to_uri);
+});
+
+app.get("/chess", function(request, response) {
+  var to_uri = "/mozdemoa/" + ++index + "/" + ++index;
+  response.redirect(to_uri);
+});
+
 app.get("/datachan", function(request, response) {
   var to_uri = "/listen/" + ++index + "/" + ++index;
   response.redirect(to_uri);
@@ -173,7 +189,7 @@ app.get("/mozdemojsep/:user" + user_re + "/:target" + user_re, function(request,
   response.render("mozdemo_jsep.html", params);
 });
 
-app.get("/mozdemojp", function(request, response) {
+app.get("/jsep", function(request, response) {
   var to_uri = "/mozdemojsep/" + ++index + "/" + ++index;
   response.redirect(to_uri);
 });
