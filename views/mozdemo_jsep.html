@@ -29,8 +29,11 @@
 <button id="clear log" onclick="clear_log();">Clear Log</button>
 <button id="startcall" onclick="cc.StartCall();">StartCall</button>
 <button id="createoffer" onclick="cc.CreateOffer();">CreateOffer</button>
+<button id="setlocal" onclick="cc.SetLocalDesc();">SetLocalDesc</button>
 <button id="hangup" onclick="cc.HangUp();">Hang Up</button>
 <button id="CreateAnswer" onclick="cc.CreateAnswer();">CreateAnswer</button>
+<button id="setremote" onclick="cc.SetRemoteDesc();">SetRemoteDesc</button>
+
 {{if !start}}
 <a id="callme" style="display:none;" href="/mozdemoc/${ them }/${ me }">Call me</a>
 {{/if}}

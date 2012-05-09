@@ -104,7 +104,15 @@ var CallingClient = function(config_, username, peer, local, remote, start_call,
       });
  	
   }
+  
+  var SetLocalDesc = function() {
+  	msg = webrtc.setLocalDescription();
+  }  
 
+  var SetRemoteDesc = function() {
+  	msg = webrtc.setRemoteDescription();
+  }
+  
   log("Calling client: user=" + username + " peer = " + peer);
   log(" config = " +JSON.stringify(config));
   var webrtc = navigator.getWebrtcContext(JSON.stringify(config), function(msg, arg, localStream, remoteStream) {
@@ -196,7 +204,9 @@ var CallingClient = function(config_, username, peer, local, remote, start_call,
     HangUp : HangUp,
     StartCall : StartCall,
     CreateOffer : CreateOffer,
-    CreateAnswer : CreateAnswer
+    CreateAnswer : CreateAnswer,
+    SetLocalDesc : SetLocalDesc,
+    SetRemoteDesc : SetRemoteDesc
   }
 
 };
