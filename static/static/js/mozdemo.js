@@ -67,14 +67,14 @@ var CallingClient = function(config_, username, peer, local, remote, start_call,
 
   var CreateOffer = function() {
   	msg = webrtc.createOffer();
-  	log("offer: " + JSON.stringify(msg));
+  	//log("offer: " + JSON.stringify(msg));
   	
       var msg2 = {
         dest: peer,
         body: msg
       };
 
-      log("Sending: " + JSON.stringify(msg2));
+      log("Sending Offer: " + JSON.stringify(msg2));
 
       ajax({
         url: "/msg/",
@@ -85,16 +85,16 @@ var CallingClient = function(config_, username, peer, local, remote, start_call,
 	
   }
   
-  var CreateAnswer = function() {
-  	msg = webrtc.createAnswer();
-  	log("answer: " + JSON.stringify(msg));
+  var CreateAnswer = function(sdp) {
+  	msg = webrtc.createAnswer(sdp);
+  	//log("answer: " + JSON.stringify(msg));
   	
        var msg2 = {
         dest: peer,
         body: msg
       };
 
-      log("Sending: " + JSON.stringify(msg2));
+      log("Sending Answer: " + JSON.stringify(msg2));
 
       ajax({
         url: "/msg/",
@@ -105,12 +105,16 @@ var CallingClient = function(config_, username, peer, local, remote, start_call,
  	
   }
   
-  var SetLocalDesc = function() {
-  	msg = webrtc.setLocalDescription();
+  var SetLocalDesc = function(action, sdp) {
+  	msg = webrtc.setLocalDescription(action, sdp);
   }  
 
-  var SetRemoteDesc = function() {
-  	msg = webrtc.setRemoteDescription();
+  var SetRemoteDesc = function(action, sdp) {
+  	msg = webrtc.setRemoteDescription(action, sdp);
+  }
+  
+  var EndConnection = function() {
+    webrtc.EndConnection();
   }
   
   log("Calling client: user=" + username + " peer = " + peer);
@@ -206,7 +210,8 @@ var CallingClient = function(config_, username, peer, local, remote, start_call,
     CreateOffer : CreateOffer,
     CreateAnswer : CreateAnswer,
     SetLocalDesc : SetLocalDesc,
-    SetRemoteDesc : SetRemoteDesc
+    SetRemoteDesc : SetRemoteDesc,
+    EndConnection : EndConnection
   }
 
 };

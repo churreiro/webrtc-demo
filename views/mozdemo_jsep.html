@@ -26,13 +26,17 @@
 </style>
 <div id="remote"><video id="rview" width="640" height="480"/></div>
 <div id="local"><video id="lview" width="640" height="480"/></div>
-<button id="clear log" onclick="clear_log();">Clear Log</button>
-<button id="startcall" onclick="cc.StartCall();">StartCall</button>
+<button id="clear log" onclick="clear_log();">Clear Log</button><br>
+
 <button id="createoffer" onclick="cc.CreateOffer();">CreateOffer</button>
-<button id="setlocal" onclick="cc.SetLocalDesc();">SetLocalDesc</button>
-<button id="hangup" onclick="cc.HangUp();">Hang Up</button>
-<button id="CreateAnswer" onclick="cc.CreateAnswer();">CreateAnswer</button>
-<button id="setremote" onclick="cc.SetRemoteDesc();">SetRemoteDesc</button>
+<button id="CreateAnswer" onclick="CreateAnswer();">CreateAnswer</button><br>
+
+<input type="radio" id="offerradio" name="reg" value="0" checked onClick=""> Offer
+<input type="radio" id="answerradio" name="reg" value="1" onClick=""> Answer<br>
+
+<button id="setlocal" onclick="SetLocalDesc();">SetLocalDesc</button>
+<button id="setremote" onclick="SetRemoteDesc();">SetRemoteDesc</button><br>
+<button id="EndConnection" onclick="cc.EndConnection();">EndConnection</button><br>
 
 {{if !start}}
 <a id="callme" style="display:none;" href="/mozdemoc/${ them }/${ me }">Call me</a>
@@ -43,11 +47,38 @@
   var them = "${ them }";
   var start = ${ start };
   var ip = "${ ip }";
+  var sdp = "v=0\r\no=Cisco-SIPUA 4949 0 IN IP4 10.86.255.143\r\ns=SIP Call\r\nt=0 0\r\nm=audio 16384 RTP/AVP 0 8 9 101\r\nc=IN IP4 10.86.255.143\r\na=rtpmap:0 PCMU/8000\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:9 G722/8000\r\na=rtpmap:101 telephone-event/8000\r\na=fmtp:101 0-15\r\na=sendrecv\r\nm=video 1024 RTP/AVP 97\r\nc=IN IP4 10.86.255.143\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 profile-level-id=42E00C\r\na=sendrecv\r\n";
 
   var local = document.getElementById("lview");
   var remote = document.getElementById("rview");
+  var action = 0;  // 0 == offer , 1 == answer
+  var offerradio = document.getElementById("offerradio");
+  var answerradio = document.getElementById("answerradio");  
 
   var cc = new CallingClient(default_config, me, them, local, remote, start, ip);
+  
+  var CreateAnswer = function() {
+    cc.CreateAnswer(sdp);
+  }
+
+  var SetLocalDesc = function() {
+    if (offerradio.checked)  {
+      action = 0;
+    } else {
+      action = 1;
+    }
+    cc.SetLocalDesc(action, sdp);    
+  }
+
+  var SetRemoteDesc = function() {
+    if (answerradio.checked)  {
+      action = 1;
+    } else {
+      action = 0;
+    }
+    cc.SetRemoteDesc(action, sdp);    
+  }
+  
 </script>
 </body>
 </html>
